@@ -21,11 +21,21 @@ export function ApiModal() {
 
   useEffect(() => {
     setMounted(true);
-    setInputValue(apiKey);
-    if (!apiKey) {
+    let currentKey = apiKey;
+
+    if (typeof window !== "undefined") {
+      const localKey = localStorage.getItem("finnhub_api_key");
+      if (localKey && !apiKey) {
+        setApiKey(localKey);
+        currentKey = localKey;
+      }
+    }
+
+    setInputValue(currentKey);
+    if (!currentKey) {
       setModalOpen(true);
     }
-  }, [apiKey, setModalOpen]);
+  }, [apiKey, setApiKey, setModalOpen]);
 
   if (!mounted) return null;
 
@@ -34,7 +44,11 @@ export function ApiModal() {
       toast.error("Please enter a valid API key.");
       return;
     }
-    setApiKey(inputValue.trim());
+    const sanitizedKey = inputValue.trim();
+    if (typeof window !== "undefined") {
+      localStorage.setItem("finnhub_api_key", sanitizedKey);
+    }
+    setApiKey(sanitizedKey);
     setModalOpen(false);
     toast.success("API Key saved securely to your local storage!");
   };
