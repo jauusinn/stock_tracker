@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Decentralized Stocks Tracker
 
-## Getting Started
+A modern, high-performance financial dashboard built to track real-time stock market data, calculate Relative Strength (RS) percentiles, and visualize historical price action. 
 
-First, run the development server:
+Designed with a strict **Bring Your Own Key (BYOK)** architecture, this application connects directly to the Finnhub API from your browser's local storage. Your data and credentials never touch a centralized server, ensuring complete privacy and decentralization.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Bring Your Own Key (BYOK)**: Securely paste your free Finnhub.io API token directly into the browser. Credentials are encrypted in local storage, eliminating `.env` backend requirements and telemetry.
+- **IBD-Style Relative Strength (RS) Engine**: Evaluates a stock's 1-year performance against the `SPY` benchmark, generating a mathematically rigorous 1-99 Relative Strength score dynamically color-coded for instant trend analysis.
+- **Live Search & Watchlist**: Lightning-fast debounced search across US exchanges. Add or remove tickers simply by clicking, managed entirely by persistent client-side Zustand state.
+- **Sparkline Visualization**: Minimalist, real-time Recharts sparklines graphing 30-day historical closure trends directly on the dashboard cards.
+- **Resilient Architecture**:
+  - **Rate Limiting**: Built-in exponential backoff strictly adhering to Finnhub's 60-calls/minute free-tier limit, visualized elegantly via Sonner toast notifications.
+  - **Error Boundaries**: Granular React Class Error Boundaries isolate network failures to individual UI cards without crashing the entire grid layout.
+- **Fluid UI**: Fully responsive Tailwind CSS grid, featuring physics-based Framer Motion hover effects, staggered mounting layouts, and native Dark/Light mode toggling.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Technology Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js 16 (React 19) App Router
+- **Styling:** Tailwind CSS + `clsx`/`tailwind-merge`
+- **UI Components:** Shadcn/UI (Radix UI) + Lucide Icons
+- **State Management:** Zustand (with LocalStorage persist middleware)
+- **Animations:** Framer Motion
+- **Charting:** Recharts
+- **Data Provider:** Finnhub API v1
 
-## Learn More
+## 🚀 How to Use
 
-To learn more about Next.js, take a look at the following resources:
+### 1. Open the Web App
+Navigate to the live application URL deployed on Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Activate the Dashboard
+Upon your first visit, the Web App will automatically lock and prompt you for an API token. 
+1. Click the **Register** link in the modal to fetch a completely free API token from [Finnhub.io](https://finnhub.io/).
+2. Paste the 64-bit token into the secure password input.
+3. The dashboard will instantly unlock and hydrate your saved watchlist!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+*(You can update or revoke your API key at any time by clicking the Settings `<Gear />` icon in the top right navigation header).*
 
-## Deploy on Vercel
+## 🚢 GitHub & Vercel Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Because this architecture relies entirely on Client Components for data-fetching and decoupled local storage, it requires **zero environment variables** on the host server!
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To deploy your own copy:
+1. Fork or mirror this repository to your GitHub account.
+2. Link the repository directly in your [Vercel Dashboard](https://vercel.com).
+3. Vercel will automatically detect Next.js and deploy the production build seamlessly on every commit.
+
+## 📜 License
+MIT License. Feel free to fork, modify, and deploy for your own personal finance tracking.
