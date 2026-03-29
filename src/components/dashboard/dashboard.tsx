@@ -24,7 +24,7 @@ const itemVariants: Variants = {
 };
 
 export function Dashboard() {
-  const { symbols, isHydrated } = useWatchlist();
+  const { symbols, isHydrated, removeSymbol } = useWatchlist();
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRatings, setSelectedRatings] = useState<Record<string, any>>({});
@@ -33,6 +33,11 @@ export function Dashboard() {
     setSelectedTicker(symbol);
     setSelectedRatings(ratings);
     setIsModalOpen(true);
+  };
+
+  const handleRemoveFromWatchlist = (sym: string) => {
+    removeSymbol(sym);
+    setIsModalOpen(false);
   };
 
   if (!isHydrated) {
@@ -93,6 +98,7 @@ export function Dashboard() {
         ticker={selectedTicker} 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+        onRemoveFromWatchlist={handleRemoveFromWatchlist}
         {...selectedRatings}
       />
     </motion.div>

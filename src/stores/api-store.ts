@@ -13,8 +13,18 @@ export const useApiStore = create<ApiState>()(
   persist(
     (set) => ({
       apiKey: "",
-      setApiKey: (key) => set({ apiKey: key }),
-      clearApiKey: () => set({ apiKey: "" }),
+      setApiKey: (key) => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("finnhub_api_key", key);
+        }
+        set({ apiKey: key });
+      },
+      clearApiKey: () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("finnhub_api_key");
+        }
+        set({ apiKey: "" });
+      },
       isModalOpen: false, 
       setModalOpen: (open) => set({ isModalOpen: open }),
     }),

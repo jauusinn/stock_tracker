@@ -6,7 +6,7 @@ import { CompanyProfile } from "@/types/stock";
 import { useRatingEngine } from "@/hooks/use-rating-engine";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Globe, Building2, CircleDollarSign, Hash, LineChart } from "lucide-react";
+import { Globe, Building2, CircleDollarSign, Hash, LineChart, ExternalLink, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface CompanyDetailsModalProps {
@@ -17,9 +17,10 @@ interface CompanyDetailsModalProps {
   epsRating?: number | string | null;
   smrRating?: string | null;
   accDisRating?: string | null;
+  onRemoveFromWatchlist?: (ticker: string) => void;
 }
 
-export function CompanyDetailsModal({ ticker, isOpen, onClose, rsRating, epsRating, smrRating, accDisRating }: CompanyDetailsModalProps) {
+export function CompanyDetailsModal({ ticker, isOpen, onClose, rsRating, epsRating, smrRating, accDisRating, onRemoveFromWatchlist }: CompanyDetailsModalProps) {
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -187,15 +188,26 @@ export function CompanyDetailsModal({ ticker, isOpen, onClose, rsRating, epsRati
         </div>
 
         {(!loading && (profile || ticker)) && (
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
-             {profile?.weburl && (
-               <a href={profile.weburl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors py-2.5 bg-white dark:bg-slate-950 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <Globe className="w-4 h-4" /> View Official Website
-               </a>
-             )}
-             <a href={`https://www.tradingview.com/chart/?symbol=${ticker}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full gap-2 text-sm font-bold text-white transition-colors py-2.5 bg-blue-600 dark:bg-blue-600 rounded-xl hover:bg-blue-700 dark:hover:bg-blue-500 shadow-md">
-                <LineChart className="w-4 h-4" /> View Chart on TradingView
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2">
+             {/* Top Left: Primary TradingView */}
+             <a href={`https://www.tradingview.com/chart/?symbol=${ticker}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full gap-1.5 text-xs font-semibold text-white transition-colors py-2.5 bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm">
+                <LineChart className="w-3.5 h-3.5" /> TradingView
              </a>
+             
+             {/* Top Right: Outline IBD Research */}
+             <a href={`https://research.investors.com/quote.aspx?symbol=${ticker}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors py-2.5 bg-white dark:bg-slate-950 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm">
+                <ExternalLink className="w-3.5 h-3.5" /> IBD Research
+             </a>
+
+             {/* Bottom Left: Official Website */}
+             <a href={profile?.weburl || "#"} target={profile?.weburl ? "_blank" : "_self"} rel={profile?.weburl ? "noopener noreferrer" : ""} className={`flex items-center justify-center w-full gap-1.5 text-xs font-semibold transition-colors py-2.5 rounded-lg border shadow-sm ${profile?.weburl ? "text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white" : "opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600"}`}>
+                <Globe className="w-3.5 h-3.5" /> {profile?.weburl ? "Website" : "No Website"}
+             </a>
+
+             {/* Bottom Right: Remove from Watchlist */}
+             <button onClick={() => ticker && onRemoveFromWatchlist?.(ticker)} className="flex items-center justify-center w-full gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors py-2.5 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg border border-rose-200 dark:border-rose-900/50 shadow-sm">
+                <Trash2 className="w-3.5 h-3.5" /> Remove
+             </button>
           </div>
         )}
       </DialogContent>

@@ -1,6 +1,7 @@
 import { finnhubRateLimiter } from "@/utils/rate-limiter";
 import { useApiStore } from "@/stores/api-store";
 import { StockCandle, StockMetrics } from "@/types/stock";
+import { fetchWithCache } from "@/utils/fetchWithCache";
 
 export class FinnhubService {
   private readonly baseUrl = "https://finnhub.io/api/v1";
@@ -37,35 +38,53 @@ export class FinnhubService {
     const safeFrom = from > 9999999999 ? Math.floor(from / 1000) : Math.floor(from);
     const safeTo = to > 9999999999 ? Math.floor(to / 1000) : Math.floor(to);
     const endpoint = `/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${safeFrom}&to=${safeTo}`;
-    try {
-      const res: any = await this.fetchApi(endpoint);
-      
-      if (res.s === "no_data") {
-        return { open: [], high: [], low: [], close: [], volume: [], timestamps: [], status: "no_data" };
-      }
-      
-      return {
-        open: res.o || [],
-        high: res.h || [],
-        low: res.l || [],
-        close: res.c || [],
-        volume: res.v || [],
-        timestamps: res.t || [],
-        status: res.s || "ok",
-      };
-    } catch (error: any) {
-       if (error?.status === 429) {
-         console.warn(`Rate limit exceeded for /stock/candle (${symbol}). Returning empty fallback.`);
-         return { open: [], high: [], low: [], close: [], volume: [], timestamps: [], status: "error_429" };
-       }
-       throw error;
-    }
+    
+    // Normalize cache key to ignore the exact seconds of the request, allowing 12h TTL
+    const cacheKey = `finnhub_candle_${symbol}_${resolution}`;
+
+    return fetchWithCache(
+      cacheKey,
+      async () => {
+        try {
+          const res: any = await this.fetchApi(endpoint);
+          
+          if (res.s === "no_data") {
+            return { open: [], high: [], low: [], close: [], volume: [], timestamps: [], status: "no_data" };
+          }
+          
+          return {
+            open: res.o || [],
+            high: res.h || [],
+            low: res.l || [],
+            close: res.c || [],
+            volume: res.v || [],
+            timestamps: res.t || [],
+            status: res.s || "ok",
+          };
+        } catch (error: any) {
+           if (error?.status === 429) {
+             console.warn(`Rate limit exceeded for /stock/candle (${symbol}). Returning empty fallback.`);
+             return { open: [], high: [], low: [], close: [], volume: [], timestamps: [], status: "error_429" };
+           }
+           throw error;
+        }
+      },
+      12 // 12 hour TTL
+    );
   }
 
   async getMetrics(symbol: string): Promise<StockMetrics> {
     const endpoint = `/stock/metric?symbol=${symbol}&metric=all`;
-    const res: any = await this.fetchApi(endpoint);
-    return res.metric || {};
+    const cacheKey = `finnhub_metric_${symbol}`;
+    
+    return fetchWithCache(
+      cacheKey,
+      async () => {
+        const res: any = await this.fetchApi(endpoint);
+        return res.metric || {};
+      },
+      12 // 12 hour TTL
+    );
   }
 
   async getCompanyProfile(symbol: string): Promise<any> {
